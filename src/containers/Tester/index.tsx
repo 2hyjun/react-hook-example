@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Actions } from './reducer';
 import { AppState } from '../../store/reducer';
@@ -9,11 +9,6 @@ const Tester: React.FunctionComponent = () => {
     const dispatch = useDispatch();
     const initiateTest = useCallback(() => dispatch(Actions.testRequest()), [dispatch]);
     useToast(test);
-
-    useEffect(() => {
-        const timerId = setInterval(initiateTest, 2000);
-        return () => clearInterval(timerId);
-    }, []);
 
     return (
         <div>

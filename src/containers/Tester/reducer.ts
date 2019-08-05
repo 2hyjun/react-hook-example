@@ -1,14 +1,13 @@
 import { AnyAction } from 'redux';
+import { createActions, handleActions } from 'redux-actions';
 
 export interface TestState {
     isRunning: boolean;
-    success: string | null;
     error: string | null;
 }
 
 const initialState: TestState = {
     isRunning: false,
-    success: null,
     error: null,
 };
 
@@ -18,29 +17,43 @@ export enum Types {
     TEST_FAILURE = 'TEST_FAILURE',
 }
 
-export const Actions = {
-    testRequest: (): AnyAction => ({
-        type: Types.TEST_REQUEST,
-    }),
-    testSuccess: (message: string): AnyAction => ({
-        type: Types.TEST_SUCCESS,
-        payload: message
-    }),
-    testFailure: (error: any): AnyAction => ({
-        type: Types.TEST_FAILURE,
-        error: error,
-    }),
-};
+export interface Actions {
+    testRequest: () => AnyAction;
+    testSuccess: (message: string) => AnyAction;
+    testFailure: (error: string) => AnyAction;
+}
 
-export const reducer = (state: TestState = initialState, action: AnyAction): TestState => {
-    switch (action.type) {
-        case Types.TEST_REQUEST:
-            return { ...state, isRunning: true, error: null, success: null };
-        case Types.TEST_SUCCESS:
-            return { ...state, isRunning: false, error: null, success: action.payload };
-        case Types.TEST_FAILURE:
-            return { ...state, error: action.error, isRunning: false, success: null };
-        default:
-            return state;
-    }
-};
+// @ts-ignore
+export const Actions: Actions = createActions({
+    [Types.TEST_REQUEST]: () => {},
+    [Types.TEST_SUCCESS]: (message: string) => ({ message }), // return payload
+    [Types.TEST_FAILURE]: (error: string) => ({ error }),
+});
+
+const handleTestRequest = (state: TestState) => ({
+    ...state,
+    isRunning: true,
+    error: null,
+});
+
+const handleTestSuccess = (state: TestState) => ({
+    ...state,
+    isRunning: false,
+    error: null,
+});
+
+const handleTestFailure = (state: TestState, { payload }: any) => ({
+    ...state,
+    isRunning: false,
+    error: payload.error,
+});
+
+export const reducer = handleActions(
+    {
+        [Types.TEST_REQUEST]: handleTestRequest,
+        [Types.TEST_SUCCESS]: handleTestSuccess,
+        [Types.TEST_FAILURE]: handleTestFailure,
+    },
+    initialState,
+);
+
